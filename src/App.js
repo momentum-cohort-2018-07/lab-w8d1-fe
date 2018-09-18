@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 
-import textOptions from './textOptions'
+import TextEntry from './components/TextEntry'
+import TextOptions from './components/TextOptions'
+import ShrunkText from './components/ShrunkText'
 
 class App extends Component {
   constructor () {
@@ -11,6 +13,7 @@ class App extends Component {
     }
 
     this.updateText = this.updateText.bind(this)
+    this.setOption = this.setOption.bind(this)
   }
 
   updateText (event) {
@@ -20,82 +23,36 @@ class App extends Component {
   setOption (option) {
     return (event) => {
       const value = event.target.checked
-      console.log(value)
-      const optionSet = new Set(this.state.options)
+      let options = this.state.options
       if (value) {
-        optionSet.add(option)
+        options = options.concat(option)
       } else {
-        optionSet.delete(option)
+        options = options.filter(o => o !== option)
       }
       this.setState({
-        options: [...optionSet]
+        options: options
       })
     }
   }
 
-  shrinkText () {
-    let { text, options } = this.state
-
-    if (!text) {
-      return ''
-    }
-
-    let opObj
-    options.forEach(option => {
-      opObj = textOptions.find(o => o.id === option)
-      if (opObj) {
-        text = opObj.fn(text)
-      }
-    })
-
-    return text
-  }
-
   render () {
-    const text = this.state.text
-    const shrunkText = this.shrinkText()
+    const { text, options } = this.state
     return (
       <div className='App container'>
         <h1>TweetShrink</h1>
         <div className='row'>
           <div className='col'>
-            {/* TextEntry */}
-            <textarea
-              className='TextEntry-textbox'
-              placeholder='What do you want to shrink?'
-              onChange={this.updateText}
-              value={text} />
-            <div>
-              {text && `${text.length} characters`}
-            </div>
-            {/* end TextEntry */}
+            <TextEntry text={text} updateText={this.updateText} />
           </div>
           <div className='col'>
-            {/* ShrunkText */}
-            <div className='TextEntry-shrunk-text'>
-              {shrunkText}
-            </div>
-            <div>
-              {shrunkText && `${shrunkText.length} characters`}
-            </div>
-            {/* end ShrunkText */}
+            <ShrunkText text={text} options={options} />
           </div>
         </div>
         <div className='row options'>
           <div className='col-12'>
             <h4>Options</h4>
           </div>
-          {/* TextOptions */}
-          {textOptions.map((option, idx) => (
-            <div key={idx} className='col-6'>
-              {/* TextOption */}
-              <label htmlFor={option.id}>
-                <input type='checkbox' id={option.id} onChange={this.setOption(option.id)} /> {' ' + option.label}
-              </label>
-              {/* end TextOption */}
-            </div>
-          ))}
-          {/* end TextOptions */}
+          <TextOptions setOption={this.setOption} />
         </div>
       </div>
     )
